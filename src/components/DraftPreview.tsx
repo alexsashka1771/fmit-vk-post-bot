@@ -1,0 +1,35 @@
+import { useState } from 'react';
+import { Check, Copy, Download, ExternalLink, Image, Pencil, Save, Send, Sparkles } from 'lucide-react';
+import { coverStyles, composePost } from '../../shared/contracts';
+import type { Draft, DraftPatch } from '../../shared/contracts';
+import { CoverArt, VkMark } from './Art';
+
+type Props = { draft: Draft | null; dirty: boolean; busy: boolean; canPublish: boolean; onEdit: (patch: DraftPatch) => void; onSave: () => Promise<void>; onDownload: () => Promise<void>; onCopy: () => Promise<void>; onPublish: () => Promise<void>; onConnect: () => void };
+
+export default function DraftPreview({ draft, dirty, busy, canPublish, onEdit, onSave, onDownload, onCopy, onPublish, onConnect }: Props) {
+  const [tab, setTab] = useState<'post' | 'cover'>('post');
+  const [editing, setEditing] = useState(false);
+  const locked = draft?.status !== 'draft';
+  return <section className="preview-column" aria-labelledby="preview-heading">
+    <div className="preview-heading"><div><span className="step-number">02</span><h2 id="preview-heading">Ваш будущий пост</h2></div><span className="preview-tag"><span className="live-dot" />Предпросмотр</span></div>
+    <div className="preview-tabs" role="tablist" aria-label="Вид предпросмотра"><button type="button" role="tab" aria-selected={tab === 'post'} onClick={() => setTab('post')}><VkMark small />Пост ВК</button><button type="button" role="tab" aria-selected={tab === 'cover'} onClick={() => setTab('cover')}><Image size={15} />Обложка</button></div>
+    <div className={`vk-preview ${tab === 'cover' ? 'cover-only' : ''}`}>
+      {tab === 'post' && <div className="vk-post-header"><img src="/brand/avatar.jpg" alt="" width="40" height="40" /><div><strong>ФМиИТ СФ УУНиТ</strong><span>{draft ? 'Подготовлено в контент-студии' : 'Пример оформления'}</span></div><span className="three-dots" aria-hidden="true">···</span></div>}
+      {draft ? <img className="rendered-cover" src={`/api/drafts/${draft.id}/cover.png?v=${draft.revision}`} alt={`Обложка поста: ${draft.coverTitle}`} /> : <div className="sample-cover"><div className="sample-cover-grid" /><CoverArt /><span className="sample-cover-logo">ФМиИТ</span><span className="sample-cover-kicker">МАТЕМАТИКА И ТЕХНОЛОГИИ</span><strong>Погрузись<br />в технологии<br />будущего.</strong><span className="sample-cover-bottom">СФ УУНиТ <span>↗</span></span></div>}
+      {tab === 'post' && <div className="vk-post-content">
+        {draft ? editing && !locked ? <div className="copy-editor"><label className="field-label" htmlFor="post-title">Заголовок</label><input id="post-title" value={draft.title} maxLength={180} onChange={event => onEdit({ title: event.target.value })} disabled={busy} /><label className="field-label" htmlFor="post-body">Текст поста</label><textarea id="post-body" value={draft.body} rows={7} maxLength={12000} onChange={event => onEdit({ body: event.target.value })} disabled={busy} /><label className="field-label" htmlFor="post-tags">Хештеги</label><input id="post-tags" value={draft.hashtags.join(' ')} onChange={event => onEdit({ hashtags: event.target.value.split(/\s+/).filter(Boolean).slice(0, 8) })} disabled={busy} /></div> : <><h3>{draft.title}</h3><p className="post-body">{draft.body}</p><p className="post-hashtags">{draft.hashtags.join(' ')}</p></> : <><div className="preview-empty-label"><Sparkles size={14} />Здесь появится ваша история</div><p className="preview-empty-copy">Добавьте тему и пару деталей.<br />Поможем собрать их в хороший пост.</p><div className="skeleton-line long" /><div className="skeleton-line" /><div className="example-hashtags">#СФУУНиТ&nbsp; #СФУУНиТ_ФМиИТ</div></>}
+      </div>}
+      {draft && <div className="post-tools"><span>{composePost(draft).length.toLocaleString('ru')} симв. <span className="source-chip">{draft.source === 'ai' ? 'AI' : 'Демо'}</span></span><div>{!locked && <button type="button" className="text-button" onClick={() => { setEditing(value => !value); setTab('post'); }} aria-pressed={editing}><Pencil size={13} />{editing ? 'Предпросмотр' : 'Редактировать'}</button>}<button type="button" className="icon-button" aria-label="Копировать текст поста" onClick={() => void onCopy()} disabled={busy}><Copy size={15} /></button></div></div>}
+    </div>
+    {draft?.publicationError && <div className="publication-warning" role="status">{draft.publicationError}<a href="https://vk.ru/club157438856" target="_blank" rel="noreferrer">Проверить стену <ExternalLink size={12} /></a></div>}
+
+    <div className="cover-settings"><div className="cover-settings-header"><label className="field-label" id="cover-style-label">Оформление обложки</label><span>1600 × 1000</span></div><div className="cover-style-options" role="group" aria-labelledby="cover-style-label">{Object.entries(coverStyles).map(([key, label]) => <button key={key} type="button" className={`cover-style-option ${draft?.coverStyle === key || !draft && key === 'brand' ? 'active' : ''}`} aria-pressed={draft ? draft.coverStyle === key : key === 'brand'} disabled={!draft || locked || busy} onClick={() => onEdit({ coverStyle: key as Draft['coverStyle'] })}><span className={`mini-cover mini-${key}`}><span>ФМиИТ</span><i />{(draft?.coverStyle === key || !draft && key === 'brand') && <Check size={13} className="mini-check" />}</span><span>{label}</span></button>)}</div>
+      {draft && !locked && <details className="cover-copy-settings"><summary>Текст на обложке</summary><label className="field-label" htmlFor="cover-title">Заголовок обложки</label><input id="cover-title" value={draft.coverTitle} maxLength={110} onChange={event => onEdit({ coverTitle: event.target.value })} disabled={busy} /><label className="field-label" htmlFor="cover-subtitle">Подзаголовок</label><input id="cover-subtitle" value={draft.coverSubtitle} maxLength={140} onChange={event => onEdit({ coverSubtitle: event.target.value })} disabled={busy} /></details>}
+    </div>
+    {draft && <div className="draft-actions">
+      {dirty && <button type="button" className="button button-primary" onClick={() => void onSave()} disabled={busy}><Save size={16} />Сохранить правки</button>}
+      <div className="draft-actions-row"><button type="button" className="button button-outline" onClick={() => void onDownload()} disabled={busy}><Download size={16} />Скачать обложку</button>{draft.status === 'published' ? <a className="button button-primary" href={draft.publishedUrl} target="_blank" rel="noreferrer">Пост опубликован<ExternalLink size={15} /></a> : <button type="button" className="button button-primary" onClick={() => void (canPublish ? onPublish() : onConnect())} disabled={busy || draft.status === 'publishing'}><Send size={16} />{canPublish ? draft.status === 'uncertain' ? 'Проверить и повторить' : 'Опубликовать' : 'Подключить ВК'}</button>}</div>
+      <p className="draft-saved-state">{dirty ? 'Правки ещё не сохранены. Обновите предпросмотр перед публикацией.' : draft.status === 'published' ? 'Публикация подтверждена ВКонтакте.' : 'Черновик сохранён. Проверьте факты перед публикацией.'}</p>
+    </div>}
+  </section>;
+}
