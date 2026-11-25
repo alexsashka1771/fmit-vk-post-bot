@@ -18,6 +18,6 @@ After these checks, typography/contrast and the publication dialog were refined.
 
 ## External integrations
 
-GitHub authenticated as `alexsashka1771` with repository scope. The repository is to be created private and the remote commit verified after push.
+GitHub authenticated as `alexsashka1771` with repository scope. Created `https://github.com/alexsashka1771/fmit-vk-post-bot`, confirmed `isPrivate:true` / `visibility:PRIVATE`, and pushed code commit `004865376434dd4484bef1476b2e8f8405f3c13d` to `main`. `git ls-remote` matched the local code commit exactly. Secret scan inspected 55 staged files with zero findings; the working tree was clean after push.
 
 The configured AI endpoint's `/models` request returned HTTP 401. Provider request/response handling is tested with deterministic local responses; live AI generation is not claimed. No VK tokens were supplied, so no real VK messages or posts were sent. VK integration tests validate user/community token separation, PNG upload, negative owner ID, attachment and stable guid without contacting VK.

@@ -13,4 +13,4 @@
 - [x] Implement `src/App.tsx`, focused editor/preview/library/settings components, `src/styles.css` and local fonts/brand assets. Use accessible forms and responsive layouts.
 - [x] Add Russian `README.md` with PowerShell commands, VK permissions, bot startup, demo/AI modes and publication confirmation; add project `AGENTS.md` and a GitHub Actions example in docs (current OAuth scope cannot activate workflows).
 - [x] Run `npm run check`, `npm test`, `npm run lint` and `npm run build`. Exercise browser flows at desktop/mobile widths and inspect rendered covers. Save verification evidence.
-- [ ] Inspect staged files for credentials. Create the private GitHub repository, make the authorized initial commit, push and verify repository visibility and the remote commit.
+- [x] Inspect staged files for credentials. Create the private GitHub repository, make the authorized initial commit, push and verify repository visibility and the remote commit. Verified code commit: `004865376434dd4484bef1476b2e8f8405f3c13d`; repository: `https://github.com/alexsashka1771/fmit-vk-post-bot`, visibility `PRIVATE`.
